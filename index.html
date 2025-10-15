@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Santri Language Violation Form | LAC</title>
 
+    <meta name="title" content="Santri Language Violation Form | LAC" />
+    <meta name="description"
+        content="LAC Violation Report — submit language violation records with student data, witnesses, and details in one simple and responsive form" />
+    <meta itemprop="image" content="icons/icon.png"  />
+    <link rel="icon" type="image/x-icon" href="icons/icon.png" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://think-ness.github.io/lac" />
+    <meta property="og:title" content="Santri Language Violation Form | LAC" />
+    <meta property="og:description"
+        content="LAC Violation Report — submit language violation records with student data, witnesses, and details in one simple and responsive form" />
+    <meta property="og:image"  content="icons/icon.png" />
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007bff">
+
+
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
@@ -77,7 +94,7 @@
                 <input type="text" id="class" class="form-control" readonly />
               </div>
               <div class="col-md-3 mb-3">
-                <label class="form-label">Dorm</label>
+                <label class="form-label">Dormitory</label>
                 <input type="text" id="dorm" class="form-control" readonly />
               </div>
             </div>
@@ -101,6 +118,9 @@
               <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill">
                 Submit Report
               </button>
+              <button id="installBtn" class="btn btn-outline-primary mt-3" style="display:none;">
+                <i class="bi bi-download"></i> Install App
+              </button>
             </div>
 
           </form>
@@ -110,7 +130,39 @@
   </div>
 </div>
 
+
+
+<script>
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    installBtn.style.display = 'none';
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('App installed 🎉');
+    }
+    deferredPrompt = null;
+  });
+</script>
+
+
 <!-- JS -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('Service Worker registered ✅'));
+  }
+</script>
+
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 

@@ -1,0 +1,21 @@
+{
+  "name": "LAC Violation Report",
+  "short_name": "LAC Report",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "description": "Form for recording language violations by students (LAC).",
+  "icons": [
+    {
+      "src": "icons/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
