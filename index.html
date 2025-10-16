@@ -5,265 +5,535 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Santri Language Violation Form | LAC</title>
 
-    <meta name="title" content="Santri Language Violation Form | LAC" />
-    <meta name="description"
-        content="LAC Violation Report — submit language violation records with student data, witnesses, and details in one simple and responsive form" />
-    <meta itemprop="image" content="icons/icon.png"  />
-    <link rel="icon" type="image/x-icon" href="icons/icon.png" />
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://think-ness.github.io/lac" />
-    <meta property="og:title" content="Santri Language Violation Form | LAC" />
-    <meta property="og:description"
-        content="LAC Violation Report — submit language violation records with student data, witnesses, and details in one simple and responsive form" />
-    <meta property="og:image"  content="icons/icon.png" />
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#007bff">
-
+  <meta name="title" content="Santri Language Violation Form | LAC" />
+  <meta name="description" content="LAC Violation Report — submit language violation records with student data, witnesses, and details in one simple and responsive form" />
+  <meta itemprop="image" content="icons/icon.png" />
+  <link rel="icon" type="image/x-icon" href="icons/icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#007bff" />
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-
   <!-- Select2 -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <!-- add monospace font similar to image -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    /* theme variables (light default) */
+    :root {
+      --bg-start: #f8faff;
+      --bg-end: #eef2f8;
+      --card-bg: #ffffff;
+      --card-border: rgba(13,110,253,0.08);
+      --glass-highlight: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.92));
+      --text-color: #1f2937;         /* main page text in light */
+      --muted: #4b5563;              /* labels / secondary text */
+      --accent: #e76b5a;
+      --cta: #2f8b4f;
+      --input-bg: #ffffff;
+      --input-color: #0f1724;
+      --placeholder-color: rgba(15,23,36,0.35);
+      --input-border: rgba(0,0,0,0.08);
+      --select-bg: #ffffff;
+      --select-color: #0f1724;
+      --header-text: #0b1220;
+    }
+
+    /* dark theme override */
+    [data-theme="dark"] {
+      --bg-start: #141418;
+      --bg-end: #1b1c21;
+      --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --card-border: rgba(255,255,255,0.06);
+      --text-color: rgba(255,255,255,0.9);
+      --muted: rgba(255,255,255,0.75);
+      --input-bg: rgba(255,255,255,0.02);
+      --input-color: #f5f5f5;
+      --placeholder-color: rgba(245,245,245,0.35);
+      --input-border: rgba(255,255,255,0.18);
+      --select-bg: rgba(255,255,255,0.02);
+      --select-color: #f5f5f5;
+      --header-text: #f3f3f3;
+    }
+
     body {
-      background: linear-gradient(135deg, #f8faff 0%, #eef2f8 100%);
-      font-family: "Poppins", sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(48,58,82,0.06), transparent),
+                  linear-gradient(180deg, var(--bg-start), var(--bg-end));
+      color: var(--text-color);
+      font-family: "Space Mono", monospace;
+      -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
     }
+
+    /* Responsive card sizing: fluid with sensible max-widths */
     .card {
-      border: none;
-      border-radius: 1rem;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 720px; /* desktop maximum */
+      border-radius: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.02);
+      padding: 28px;
+      backdrop-filter: blur(10px) saturate(1.05);
     }
+
+    /* tighter inner layout for larger screens */
+    @media (min-width: 992px) {
+      .card { max-width: 720px; padding: 36px; }
+      .card-header .title { font-size: 1.6rem; }
+      .form-control, .form-select { font-size: 1rem; padding: 14px 16px; }
+      .btn-primary { padding: 14px 22px; font-size: 1rem; }
+    }
+
+    @media (min-width: 768px) and (max-width:991px) {
+      .card { max-width: 640px; padding: 32px; }
+      .card-header .title { font-size: 1.4rem; }
+    }
+
+    /* mobile: full width, reduced padding */
+    @media (max-width: 767px) {
+      body { padding: 24px 12px; }
+      .card { max-width: 100%; padding: 18px; border-radius: 16px; }
+      .card-header { flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 12px; }
+      .card-header .progress { align-self: flex-end; font-size: 0.9rem; color: rgba(255,255,255,0.6); }
+      .card-header .title { font-size: 1.15rem; }
+      label { font-size: 0.85rem; margin-bottom: 6px; }
+      .form-control, .form-select { font-size: 0.95rem; padding: 10px 12px; }
+      .btn-primary { font-size: 0.95rem; padding: 12px 14px; border-radius: 8px; }
+      .header-underline { height: 6px; border-radius: 6px; }
+    }
+
+    /* ensure form rows wrap cleanly on small screens */
+    .row > [class*="col-"] {
+      display: block;
+      width: 100%;
+    }
+    @media (min-width: 576px) {
+      .row > .col-md-6 { width: 50%; display: inline-block; vertical-align: top; padding-right: 8px; box-sizing: border-box; }
+      .row > .col-md-3 { width: 25%; display: inline-block; vertical-align: top; padding-left: 8px; box-sizing: border-box; }
+      /* restore bootstrap-like spacing for larger widths */
+    }
+
+    /* Select2: always take full width and avoid clipping by using body as dropdown parent */
+    .select2-container { width: 100% !important; }
+    .select2-container--default .select2-selection--single { height: auto; min-height: 44px; padding: 6px 10px; border-radius: 6px; }
+    .select2-selection__rendered { padding-left: 2px; }
+
+    /* small visual tweaks */
+    .card-body { padding-top: 6px; }
+    .mb-3 { margin-bottom: 12px !important; }
+    .mb-4 { margin-bottom: 14px !important; }
+    .text-center .btn { width: 100%; }
+
+    /* keep consistent focus outline for accessibility */
+    .form-control:focus, .form-select:focus { outline: 3px solid rgba(47,139,79,0.12); }
+
+    /* Header redesigned like the reference */
     .card-header {
-      background: linear-gradient(90deg, #0d6efd, #6610f2);
-      color: #fff;
-      font-weight: 600;
-      border-top-left-radius: 1rem;
-      border-top-right-radius: 1rem;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      background: transparent;
+      padding: 0 0 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+    .card-header .title {
+      color: var(--header-text);
+      font-size: 1.5rem;
+      letter-spacing: 0.06em;
+      margin: 0;
+      font-weight: 700;
+      position: relative;
+    }
+    .card-header .progress {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    /* decorative underline bar */
+    .header-underline {
+      margin-top: 10px;
+      height: 8px;
+      width: 100%;
+      position: relative;
+      display: block;
+    }
+    .header-underline::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 8px;
+      width: 42%;
+      background: var(--accent);
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      transform-origin: right center;
+    }
+    .header-underline::after {
+      content: "";
+      position: absolute;
+      left: 42%;
+      top: 0;
+      height: 8px;
+      width: 58%;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      /* little notch to mimic arrow */
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+    }
+
+    .card-body {
+      padding: 6px 0 0 0;
+    }
+
     label {
-      font-weight: 500;
+      display: block;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      letter-spacing: 0.06em;
     }
-    @media (max-width: 768px) {
-      .card-body {
-        padding: 1.5rem !important;
-      }
-      .card-header h4 {
-        font-size: 1.1rem;
-      }
+
+    .form-control, .form-select {
+      background: var(--input-bg);
+      color: var(--input-color);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: "Space Mono", monospace;
+      font-size: 0.95rem;
+      outline: none;
+      transition: box-shadow .18s, border-color .18s;
+    }
+
+    .form-control::placeholder {
+      color: var(--placeholder-color);
+      letter-spacing: 0.04em;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: rgba(255,255,255,0.28);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.025);
+    }
+
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    /* Select2 appearance follow theme */
+    .select2-container--default .select2-selection--single {
+      background: var(--select-bg);
+      border: 1px solid var(--input-border);
+      padding: 6px 10px;
+      border-radius: 6px;
+      height: auto;
+    }
+    .select2-selection__rendered {
+      color: var(--select-color);
+      padding-left: 6px;
+      font-family: "Space Mono", monospace;
+    }
+    /* dropdown panel */
+    .select2-container--default .select2-dropdown {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-color);
+    }
+    .select2-container--default .select2-results__option {
+      color: var(--text-color);
+      padding: 8px 10px;
+    }
+    .select2-container--default .select2-results__option--highlighted {
+      background: rgba(0,0,0,0.06);
+    }
+
+    .btn-primary {
+      background: var(--cta);
+      border: none;
+      color: #fff;
+      font-family: "Space Mono", monospace;
+      letter-spacing: 0.08em;
+      padding: 14px 18px;
+      border-radius: 6px;
+      box-shadow: 0 6px 18px rgba(47,139,79,0.18);
+    }
+
+    .btn-outline-primary {
+      border-color: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.75);
+      background: transparent;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-color);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      z-index: 9999;
+      transition: transform .12s ease;
+    }
+    .theme-toggle:hover { transform: translateY(-2px); }
+    .theme-toggle i { font-size: 1.05rem; }
+
+    @media (max-width: 576px) {
+      .card { width: 92%; padding: 20px; }
     }
   </style>
 </head>
+
 <body>
+  <!-- added: theme toggle button -->
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+    <i id="themeIcon" class="bi bi-sun-fill" aria-hidden="true"></i>
+    <span style="font-size:0.85rem; font-family:Space Mono;">Light</span>
+  </button>
 
-<div class="container py-4 py-md-5">
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-10 col-lg-8">
-      <div class="card">
-        <div class="card-header text-center py-3">
-          <h4 class="mb-0">📋 Santri Language Violation Report</h4>
-          <small>Language Advisory Council</small>
-        </div>
-        <div class="card-body p-4 p-md-5">
-          <form id="formViolation">
-            
-            <div class="mb-3">
-              <label for="noReg" class="form-label">Registration Number</label>
-              <select id="noReg" class="form-select select2" required>
-                <option value="">Loading data...</option>
-              </select>
+  <div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+      <div class="col-12 d-flex justify-content-center">
+        <div class="card">
+          <div class="card-header">
+            <div style="flex:1;">
+              <h3 class="title">Technical Details</h3>
+              <span class="header-underline" aria-hidden="true"></span>
             </div>
+            <div class="progress" style="margin-left:16px; text-align:right;">
+              2/2
+            </div>
+          </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Full Name</label>
-                <input type="text" id="fullName" class="form-control" readonly />
+          <div class="card-body">
+            <form id="formViolation">
+              <div class="mb-3">
+                <label for="noReg" class="form-label">Registration Number</label>
+                <select id="noReg" class="form-select select2" required>
+                  <option value="">Loading data...</option>
+                </select>
               </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Class</label>
-                <input type="text" id="class" class="form-control" readonly />
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" id="fullName" class="form-control" readonly />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Class</label>
+                  <input type="text" id="class" class="form-control" readonly />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Dormitory</label>
+                  <input type="text" id="dorm" class="form-control" readonly />
+                </div>
               </div>
-              <div class="col-md-3 mb-3">
-                <label class="form-label">Dormitory</label>
-                <input type="text" id="dorm" class="form-control" readonly />
+
+              <div class="mb-3">
+                <label class="form-label">Region</label>
+                <input type="text" id="region" class="form-control" readonly />
               </div>
-            </div>
 
-            <div class="mb-3">
-              <label class="form-label">Region</label>
-              <input type="text" id="region" class="form-control" readonly />
-            </div>
+              <div class="mb-3">
+                <label class="form-label">Violation Description</label>
+                <textarea id="violation" class="form-control" rows="3" placeholder="Describe the language violation..." required></textarea>
+              </div>
 
-            <div class="mb-3">
-              <label class="form-label">Violation Description</label>
-              <textarea id="violation" class="form-control" rows="3" placeholder="Describe the language violation..." required></textarea>
-            </div>
+              <div class="mb-4">
+                <label class="form-label">Witness Name</label>
+                <input type="text" id="witness" class="form-control" placeholder="Enter witness name" required />
+              </div>
 
-            <div class="mb-4">
-              <label class="form-label">Witness Name</label>
-              <input type="text" id="witness" class="form-control" placeholder="Enter witness name" required />
-            </div>
+              <div class="text-center" style="margin-top:18px;">
+                <button type="submit" class="btn btn-primary w-100 px-5 py-2">Join now</button>
+              </div>
 
-            <div class="text-center">
-              <button type="submit" class="btn btn-primary w-100 px-5 py-2 ">
-                Submit Report
-              </button>
-
-            </div>
-            <div class="text-center">
-
-              <button id="installBtn" class="btn btn-outline-primary px-5 py-2 w-100 mt-3" style="display:none;">
-                <i class="bi bi-download"></i> Install App
-              </button>
-            </div>
-
-
-          </form>
+              <div class="text-center">
+                <button id="installBtn" class="btn btn-outline-primary px-5 py-2 w-100 mt-3" style="display:none;">
+                  <i class="bi bi-download"></i> Install App
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Theme Toggle JS -->
+  <script>
+    // filepath: d:\01. Project\04. Website\LAC\index.html
+    (function() {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const themeLabel = themeToggle.querySelector('span');
 
+      // default to 'light' if no saved value
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.dataset.theme = savedTheme;
+      updateToggleUI(savedTheme);
 
-<script>
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-  });
-
-  installBtn.addEventListener('click', async () => {
-    installBtn.style.display = 'none';
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('App installed 🎉');
-    }
-    deferredPrompt = null;
-  });
-</script>
-
-
-<!-- JS -->
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('Service Worker registered ✅'));
-  }
-</script>
-
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbyCmLa6918-B9AYPCcnBMiTtTW9cMR66Yy8V3-UD7bIi3dUp3vSRkpPumIARyPSI3i2/exec"; // 🪄 Replace with your Google Apps Script Web App URL
-
-  $(document).ready(function() {
-    $('.select2').select2({
-      placeholder: "Search by Reg. No or Name",
-      allowClear: true,
-      width: '100%'
-    });
-
-    // Load santri data
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
-        $('#noReg').empty().append('<option value="">Select Reg. No / Name</option>');
-        data.forEach(s => {
-          $('#noReg').append(
-            `<option value="${s.regNo}" data-name="${s.name}" data-class="${s.class}" data-dorm="${s.dorm}" data-region="${s.region}">
-              ${s.regNo} - ${s.name}
-            </option>`
-          );
-        });
-      })
-      .catch(() => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Failed to Load Data',
-          text: 'Please check your connection or API link.',
-        });
+      themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+        updateToggleUI(next);
       });
 
-    // Fill data on selection
-    $('#noReg').on('change', function() {
-      let s = $(this).find(':selected');
-      $('#fullName').val(s.data('name') || '');
-      $('#class').val(s.data('class') || '');
-      $('#dorm').val(s.data('dorm') || '');
-      $('#region').val(s.data('region') || '');
-    });
-
-    // Submit form
-    $('#formViolation').on('submit', function(e) {
-      e.preventDefault();
-
-      const data = {
-        regNo: $('#noReg').val(),
-        name: $('#fullName').val(),
-        class: $('#class').val(),
-        dorm: $('#dorm').val(),
-        region: $('#region').val(),
-        violation: $('#violation').val(),
-        witness: $('#witness').val(),
-      };
-
-      if (!data.regNo) {
-        Swal.fire('Oops!', 'Please select a student first.', 'warning');
-        return;
+      function updateToggleUI(theme) {
+        if (theme === 'dark') {
+          themeIcon.className = 'bi bi-moon-fill';
+          themeLabel.textContent = 'Dark';
+        } else {
+          themeIcon.className = 'bi bi-sun-fill';
+          themeLabel.textContent = 'Light';
+        }
       }
+    })();
+  </script>
 
-      // Show loading dialog
-      Swal.fire({
-        title: 'Submitting...',
-        text: 'Please wait while we save your report.',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
+  <!-- PWA Install & Service Worker -->
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') console.log('App installed 🎉');
+      deferredPrompt = null;
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registered ✅'));
+    }
+  </script>
+
+  <!-- Select2 + API -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyCmLa6918-B9AYPCcnBMiTtTW9cMR66Yy8V3-UD7bIi3dUp3vSRkpPumIARyPSI3i2/exec";
+
+    $(document).ready(function() {
+      // initialize Select2 with dropdownParent set to body to avoid clipping inside responsive card
+      $('.select2').select2({
+        placeholder: "Search by Reg. No or Name",
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('body')
       });
 
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-      .then(res => res.text())
-      .then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Report Submitted!',
-          text: 'The violation has been recorded successfully.',
-          confirmButtonColor: '#0d6efd',
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          $('#noReg').empty().append('<option value="">Select Reg. No / Name</option>');
+          data.forEach(s => {
+            $('#noReg').append(
+              `<option value="${s.regNo}" data-name="${s.name}" data-class="${s.class}" data-dorm="${s.dorm}" data-region="${s.region}">
+                ${s.regNo} - ${s.name}
+              </option>`
+            );
+          });
+          // trigger Select2 to recalc width
+          $('#noReg').trigger('change.select2');
+        })
+        .catch(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed to Load Data',
+            text: 'Please check your connection or API link.',
+          });
         });
-        $('#formViolation')[0].reset();
-        $('#noReg').val('').trigger('change');
-      })
-      .catch(() => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Submission Failed',
-          text: 'Please try again later.',
+
+      // Keep select2 responsive on window resize
+      $(window).on('resize', function() {
+        $('.select2').each(function() {
+          $(this).next('.select2-container').css('width', '100%');
         });
+      });
+
+      $('#noReg').on('change', function() {
+        let s = $(this).find(':selected');
+        $('#fullName').val(s.data('name') || '');
+        $('#class').val(s.data('class') || '');
+        $('#dorm').val(s.data('dorm') || '');
+        $('#region').val(s.data('region') || '');
+      });
+
+      $('#formViolation').on('submit', function(e) {
+        e.preventDefault();
+        const data = {
+          regNo: $('#noReg').val(),
+          name: $('#fullName').val(),
+          class: $('#class').val(),
+          dorm: $('#dorm').val(),
+          region: $('#region').val(),
+          violation: $('#violation').val(),
+          witness: $('#witness').val(),
+        };
+        if (!data.regNo) {
+          Swal.fire('Oops!', 'Please select a student first.', 'warning');
+          return;
+        }
+
+        Swal.fire({
+          title: 'Submitting...',
+          text: 'Please wait while we save your report.',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(data) })
+          .then(res => res.text())
+          .then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Report Submitted!',
+              text: 'The violation has been recorded successfully.',
+              confirmButtonColor: '#0d6efd',
+            });
+            $('#formViolation')[0].reset();
+            $('#noReg').val('').trigger('change');
+          })
+          .catch(() => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Submission Failed',
+              text: 'Please try again later.',
+            });
+          });
       });
     });
-  });
-</script>
+  </script>
 </body>
 </html>
