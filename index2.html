@@ -48,8 +48,7 @@
     body.theme-dark .form-control, body.theme-dark .form-select, body.theme-dark textarea{ border:1px solid rgba(255,255,255,0.06); }
     .form-control:focus, .form-select:focus, textarea:focus{ outline:none; box-shadow: 0 6px 18px rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.6); }
 
-    .chips{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:6px 0; }
-    .chip{ padding:6px 10px; border-radius:999px; font-family:"DM Mono"; font-size:.85rem; background: rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.04); }
+    /* Field(s) of expertise removed (no chip styles) */
 
     .join-btn{ background: var(--accent); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700; border:none; width:100%; box-shadow: 0 8px 24px rgba(43,182,115,0.12); }
     .join-btn i{ vertical-align:middle; }
@@ -126,17 +125,6 @@
           <div class="mb-3">
             <label for="region">Region</label>
             <input type="text" id="region" class="form-control" readonly />
-          </div>
-
-          <div class="mb-3">
-            <label>Field(s) of expertise</label>
-            <div class="chips mb-2" id="fakeChips">
-              <span class="chip">Cyber security</span>
-              <span class="chip">Bahasa</span>
-              <span class="chip">Pedagogi</span>
-              <span class="chip">+3 others</span>
-            </div>
-            <small class="text-muted">Chips ini contoh tampil saja — data asli tetap dari Select/DB.</small>
           </div>
 
           <div class="mb-3">
@@ -274,30 +262,41 @@
       });
 
       // reposition dropdown to match the input and stay inside viewport
+      let lastOpenSelect = null; // remember which select opened
       function positionSelect2Dropdown($select) {
         const $container = $select.data('select2').$container;
         const $dropdown = $('.select2-container--open .select2-dropdown');
-        if($dropdown.length === 0) return;
+        if($dropdown.length === 0 || !$container || !$container.length) return;
 
         const rect = $container[0].getBoundingClientRect();
         const viewportW = window.innerWidth || document.documentElement.clientWidth;
         const viewportH = window.innerHeight || document.documentElement.clientHeight;
 
-        // compute width: by default take input width but restrict to viewport
-        let desiredWidth = Math.min(rect.width, viewportW - 32); // 16px margin each side
+        // desired width = input width but not exceed viewport (keep small margins)
+        let desiredWidth = Math.min(rect.width, viewportW - 32);
         let left = rect.left;
-        if(left + desiredWidth > viewportW - 8) left = Math.max(8, viewportW - desiredWidth - 8);
+        if (left + desiredWidth > viewportW - 8) left = Math.max(8, viewportW - desiredWidth - 8);
 
-        // compute top: below the input if there's space, else place above
+        // compute available space
         const spaceBelow = viewportH - (rect.top + rect.height);
         const spaceAbove = rect.top;
+
+        // actual dropdown height (may be 0 initially) -> read scrollHeight as fallback
+        let ddHeight = $dropdown.outerHeight();
+        if (!ddHeight || ddHeight < 10) ddHeight = Math.min(320, Math.max(120, Math.floor(viewportH * 0.45)));
+
         let top;
-        if(spaceBelow > 220 || spaceBelow > spaceAbove) {
+        if (spaceBelow > ddHeight + 12 || spaceBelow > spaceAbove) {
           // place below
           top = rect.top + rect.height + window.scrollY + 6;
+          // limit max-height to available below space
+          $dropdown.css('max-height', Math.max(120, Math.min(ddHeight, spaceBelow - 16)) + 'px');
         } else {
           // place above
-          top = rect.top + window.scrollY - Math.min(320, spaceAbove) - 6;
+          top = rect.top + window.scrollY - ddHeight - 6;
+          if (top < 8) top = 8;
+          // limit max-height to available above space
+          $dropdown.css('max-height', Math.max(120, Math.min(ddHeight, spaceAbove - 16)) + 'px');
         }
 
         $dropdown.css({
@@ -312,15 +311,15 @@
 
       // reposition when select2 opens
       $('#noReg').on('select2:open', function(){
-        // small timeout to ensure dropdown is in DOM
+        lastOpenSelect = $(this);
+        // small timeout to ensure dropdown is in DOM and measured
         setTimeout(() => positionSelect2Dropdown($(this)), 10);
       });
 
       // also reposition on window resize and scroll while dropdown open
       $(window).on('resize scroll', function(){
-        if($('.select2-container--open').length) {
-          const $openSelect = $('.select2-container--open').prevAll('select').first();
-          if($openSelect && $openSelect.length) positionSelect2Dropdown($($openSelect[0]));
+        if($('.select2-container--open').length && lastOpenSelect) {
+          positionSelect2Dropdown(lastOpenSelect);
         }
       });
 
