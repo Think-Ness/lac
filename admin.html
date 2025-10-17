@@ -115,7 +115,7 @@
       .table-responsive table {
         min-width: 900px;
         /* force horizontal scroll if viewport narrower than table */
-        white-space: nowrap;
+        /* white-space: nowrap; */
         /* prevent wrapping so columns remain fixed width */
       }
 
@@ -168,6 +168,19 @@
       /* reduce gap under titles to save space */
       .card .card-body .card-title {
         font-size: 0.95rem;
+      }
+    }
+
+    /* responsive chart canvases in modals */
+    .modal-body canvas {
+      width: 100% !important;
+      height: 260px !important;
+      display: block;
+    }
+
+    @media (max-width: 576px) {
+      .modal-body canvas {
+        height: 340px !important;
       }
     }
   </style>
@@ -422,7 +435,7 @@
 
   <!-- Modal: Rayon Statistics -->
   <div class="modal fade" id="rayonModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-fullscreen-sm-down">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Rayon Violation Statistics</h5>
@@ -437,7 +450,7 @@
 
   <!-- Modal: Class Statistics -->
   <div class="modal fade" id="classModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-fullscreen-sm-down">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Class Violation Statistics</h5>
@@ -634,8 +647,9 @@
       rayonChart = new Chart(ctx, {
         type: 'bar',
         data: { labels, datasets: [{ label: 'Total Violations', data, backgroundColor: '#0d6efd' }] },
-        options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
       });
+      modalEl.addEventListener('shown.bs.modal', () => { setTimeout(()=> rayonChart.resize(), 50); }, { once: true });
     }
     // show class chart modal
     function showClassStats(){
@@ -654,8 +668,9 @@
       classChart = new Chart(ctx, {
         type: 'bar',
         data: { labels, datasets: [{ label: 'Total Violations', data, backgroundColor: '#198754' }] },
-        options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
       });
+      modalEl.addEventListener('shown.bs.modal', () => { setTimeout(()=> classChart.resize(), 50); }, { once: true });
     }
     function gotoV(p) { pageV = p; showViolations(); }
     document.getElementById("limitViolation").onchange = () => { pageV = 1; showViolations(); }

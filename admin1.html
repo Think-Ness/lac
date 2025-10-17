@@ -47,13 +47,22 @@
     table th {
       background-color: #f1f5ff;
     }
+    /* responsive chart in modal + modal sizing (centered, not fullscreen on mobile) */
+    .modal-dialog { max-width: 720px; }
+    .modal-content { border-radius: 0.8rem; }
+    .modal-body { overflow: hidden; } /* avoid modal internal scroll — canvas will fit */
+    .modal-body canvas { width: 100% !important; height: 260px !important; display:block; }
+    @media (max-width: 576px) {
+      .modal-dialog { max-width: 94%; } /* small, centered modal on phones */
+      .modal-body canvas { height: 300px !important; }
+    }
+
     @media (max-width: 992px) {
       .sidebar { display: none !important; }
       .content { margin-left: 0; padding: 1rem; }
     }
   </style>
 </head>
-
 <body>
   <!-- Navbar Mobile -->
   <nav class="navbar navbar-dark bg-primary d-lg-none">
@@ -162,18 +171,19 @@
 
   <!-- 📊 Modal Statistik Rayon -->
   <div class="modal fade" id="rayonModal" tabindex="-1">
+    <!-- centered, responsive dialog (not fullscreen) -->
     <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Rayon Violation Statistics</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <canvas id="rayonChart" height="120"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title">Rayon Violation Statistics</h5>
+           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+         </div>
+         <div class="modal-body">
+           <canvas id="rayonChart" height="120"></canvas>
+         </div>
+       </div>
+     </div>
+   </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -241,10 +251,15 @@
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false, // allow canvas to fill modal-body height
           plugins: { legend: { display: false } },
           scales: { y: { beginAtZero: true } }
         }
       });
+      // ensure chart sizes correctly after modal is visible
+      const modalEl = document.getElementById("rayonModal");
+      const bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modalEl.addEventListener('shown.bs.modal', () => { setTimeout(()=> rayonChart.resize(), 50); }, { once: true });
     }
 
     loadViolations();
