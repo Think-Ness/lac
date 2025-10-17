@@ -54,6 +54,37 @@
       background-color: #f1f5ff;
     }
 
+    /* Mobile navbar fixes */
+    .navbar.d-lg-none.fixed-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 0.75rem;
+    }
+
+    .navbar.d-lg-none .navbar-brand {
+      font-size: 1.05rem;
+      margin-left: 0.5rem;
+    }
+
+    /* ensure offcanvas does not hide behind navbar */
+    @media (max-width: 992px) {
+      .offcanvas.offcanvas-start {
+        top: 56px;
+        height: calc(100vh - 56px);
+      }
+
+      /* push content down so header/buttons are not overlapped */
+      .content {
+        padding-top: 0;
+      } /* JS will set exact value */
+    }
+
     /* Responsif untuk layar kecil */
     @media (max-width: 992px) {
       .sidebar {
@@ -65,12 +96,86 @@
         padding: 1rem;
       }
     }
+
+    /* --- Responsive horizontal table scrolling on small screens --- */
+    /* keep default Bootstrap behavior on desktop, enable nicer touch scroll on mobile */
+    .table-responsive {
+      position: relative;
+      /* for fade overlays */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* On small screens allow horizontal scroll and prevent wrapping of table cells */
+    @media (max-width: 767px) {
+      .table-responsive {
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      .table-responsive table {
+        min-width: 900px;
+        /* force horizontal scroll if viewport narrower than table */
+        white-space: nowrap;
+        /* prevent wrapping so columns remain fixed width */
+      }
+
+      .table-responsive table th,
+      .table-responsive table td {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+      }
+
+      /* subtle right fade to indicate more content */
+      .table-responsive::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 56px;
+        height: 100%;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(248, 249, 250, 0) 0%, rgba(248, 249, 250, 1) 100%);
+      }
+
+      /* left fade when scrolled (added via simple class when needed) */
+      .table-responsive.show-left::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 100%;
+        pointer-events: none;
+        background: linear-gradient(270deg, rgba(248, 249, 250, 0) 0%, rgba(248, 249, 250, 1) 100%);
+      }
+    }
+
+    /* --- Make stat cards more compact on small devices --- */
+    @media (max-width: 576px) {
+      .row.g-3.mb-4 .card.text-center.p-3 {
+        padding: 10px;
+      }
+
+      .row.g-3.mb-4 .card h6 {
+        font-size: 0.85rem;
+      }
+
+      .row.g-3.mb-4 .card h3,
+      .row.g-3.mb-4 .card h5 {
+        font-size: 1.1rem;
+      }
+
+      /* reduce gap under titles to save space */
+      .card .card-body .card-title {
+        font-size: 0.95rem;
+      }
+    }
   </style>
 </head>
 
 <body>
   <!-- Navbar Mobile -->
-  <nav class="navbar navbar-dark bg-primary d-lg-none">
+  <nav class="navbar navbar-dark bg-primary d-lg-none fixed-top">
     <div class="container-fluid">
       <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
         <i class="bi bi-list fs-4"></i>
@@ -364,46 +469,46 @@
     // }
 
     function renderPagination(container, total, limit, current, onPageChange) {
-  const totalPages = Math.ceil(total / limit);
-  let html = '';
+      const totalPages = Math.ceil(total / limit);
+      let html = '';
 
-  if (totalPages <= 1) {
-    document.getElementById(container).innerHTML = '';
-    return;
-  }
+      if (totalPages <= 1) {
+        document.getElementById(container).innerHTML = '';
+        return;
+      }
 
-  const visiblePages = 5; // jumlah tombol yg tampil
-  let start = Math.max(1, current - Math.floor(visiblePages / 2));
-  let end = Math.min(totalPages, start + visiblePages - 1);
+      const visiblePages = 5; // jumlah tombol yg tampil
+      let start = Math.max(1, current - Math.floor(visiblePages / 2));
+      let end = Math.min(totalPages, start + visiblePages - 1);
 
-  // Biar gak ngelompati page di ujung
-  if (end - start < visiblePages - 1) start = Math.max(1, end - visiblePages + 1);
+      // Biar gak ngelompati page di ujung
+      if (end - start < visiblePages - 1) start = Math.max(1, end - visiblePages + 1);
 
-  // Tombol Prev
-  html += `<button class="btn btn-sm btn-outline-primary" ${current === 1 ? 'disabled' : ''} onclick="${onPageChange}(${current - 1})">
+      // Tombol Prev
+      html += `<button class="btn btn-sm btn-outline-primary" ${current === 1 ? 'disabled' : ''} onclick="${onPageChange}(${current - 1})">
     <i class='bi bi-chevron-left'></i> Prev
   </button>`;
 
-  // Titik awal
-  if (start > 1) html += `<button class="btn btn-sm btn-outline-primary" onclick="${onPageChange}(1)">1</button>
+      // Titik awal
+      if (start > 1) html += `<button class="btn btn-sm btn-outline-primary" onclick="${onPageChange}(1)">1</button>
   ${start > 2 ? '<span class="px-2">...</span>' : ''}`;
 
-  // Tombol halaman aktif di sekitar
-  for (let i = start; i <= end; i++) {
-    html += `<button class="btn btn-sm ${i === current ? 'btn-primary' : 'btn-outline-primary'}" onclick="${onPageChange}(${i})">${i}</button>`;
-  }
+      // Tombol halaman aktif di sekitar
+      for (let i = start; i <= end; i++) {
+        html += `<button class="btn btn-sm ${i === current ? 'btn-primary' : 'btn-outline-primary'}" onclick="${onPageChange}(${i})">${i}</button>`;
+      }
 
-  // Titik akhir
-  if (end < totalPages) html += `${end < totalPages - 1 ? '<span class="px-2">...</span>' : ''}
+      // Titik akhir
+      if (end < totalPages) html += `${end < totalPages - 1 ? '<span class="px-2">...</span>' : ''}
   <button class="btn btn-sm btn-outline-primary" onclick="${onPageChange}(${totalPages})">${totalPages}</button>`;
 
-  // Tombol Next
-  html += `<button class="btn btn-sm btn-outline-primary" ${current === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${current + 1})">
+      // Tombol Next
+      html += `<button class="btn btn-sm btn-outline-primary" ${current === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${current + 1})">
     Next <i class='bi bi-chevron-right'></i>
   </button>`;
 
-  document.getElementById(container).innerHTML = html;
-}
+      document.getElementById(container).innerHTML = html;
+    }
 
 
 
@@ -782,8 +887,44 @@
     document.getElementById("menuStudentsMobile").onclick = (e) => { e.preventDefault(); showView('students'); };
     document.getElementById("menuReportsMobile").onclick = (e) => { e.preventDefault(); showView('reports'); };
 
+    // Ensure content is pushed below fixed mobile navbar
+    (function adjustContentForMobileNav(){
+      const navbar = document.querySelector('.navbar.d-lg-none.fixed-top');
+      const content = document.querySelector('.content');
+      if(!navbar || !content) return;
+
+      function updatePadding(){
+        const isMobile = window.innerWidth < 992;
+        const h = isMobile ? navbar.getBoundingClientRect().height : 0;
+        content.style.paddingTop = (h + 16) + 'px'; // small extra gap
+      }
+      window.addEventListener('resize', updatePadding);
+      // run on load
+      updatePadding();
+      // also update after Bootstrap offcanvas toggles (layout might shift)
+      document.addEventListener('shown.bs.offcanvas', updatePadding);
+      document.addEventListener('hidden.bs.offcanvas', updatePadding);
+    })();
+
     // Load awal
     showView('dashboard');
+
+    // Small helper: toggle left fade indicator when table is scrolled (mobile)
+    (function tableScrollFade() {
+      const tables = document.querySelectorAll('.table-responsive');
+      if (!tables.length) return;
+      function updateFade(el) {
+        if (el.scrollLeft > 12) el.classList.add('show-left'); else el.classList.remove('show-left');
+      }
+      tables.forEach(t => {
+        // only enable for small screens
+        const onScroll = () => { if (window.innerWidth <= 767) updateFade(t); else t.classList.remove('show-left'); };
+        t.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        // init state
+        onScroll();
+      });
+    })();
   </script>
 </body>
 </html>
