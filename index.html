@@ -32,14 +32,20 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
       background: linear-gradient(135deg, #f8faff 0%, #eef2f8 100%);
-      font-family: "Space Mono", monospace;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       min-height: 100vh;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
+    /* make header/title heavier like the reference image */
+    .card-header h4 { font-family: "Poppins", sans-serif; font-weight:700; letter-spacing:0.02em; }
+    /* ensure buttons use same geometric feel */
+    .btn, .form-label { font-family: "Poppins", sans-serif; }
     .card {
       border: none;
       border-radius: 1rem;
@@ -183,6 +189,20 @@
       allowClear: true,
       width: '100%'
     });
+
+    // adjust layout: if dorm column is hidden, expand "Class" column to take more width
+    (function adjustWhenDormHidden(){
+      const $dormCol = $('#dorm').closest('[class*="col-md-"]');
+      const $classCol = $('#class').closest('[class*="col-md-"]');
+      if ($dormCol.length && $classCol.length) {
+        if ($dormCol.hasClass('d-none') || $dormCol.is(':hidden')) {
+          // remove common small-md width and set to half (col-md-6)
+          $classCol.removeClass(function(i, cls){
+            return (cls.match(/(^|\s)col-md-\S+/g)||[]).join(' ');
+          }).addClass('col-md-6');
+        }
+      }
+    })();
 
     // Load santri data
     fetch(API_URL)
