@@ -578,6 +578,43 @@
         });
       });
     })();
+
+    // setup column filters for Students and Reports
+    (function initStudentReportFilters(){
+      const studentsMap = {
+        colStudentRegNo: 'regno',
+        colStudentName: 'name',
+        colStudentClass: 'class',
+        colStudentDorm: 'dorm',
+        colStudentRegion: 'region'
+      };
+      Object.keys(studentsMap).forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('input', (e) => {
+          studentColumnFilters[studentsMap[id]] = e.target.value || '';
+          pageS = 1;
+          showStudents();
+        });
+      });
+
+      const reportsMap = {
+        colReportName: 'name',
+        colReportClass: 'class',
+        colReportRayon: 'rayon',
+        colReportRegion: 'region',
+        colReportTotal: 'total'
+      };
+      Object.keys(reportsMap).forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('input', (e) => {
+          reportColumnFilters[reportsMap[id]] = e.target.value || '';
+          pageR = 1;
+          showReports();
+        });
+      });
+    })();
  
      // STUDENTS
      let students = []; let pageS = 1;
@@ -642,7 +679,8 @@
             summary[v.RegNo] = { Name: v.Name, Class: v.Class, Rayon: v.Rayon, Region: v.Region, Count: 1 };
           } else summary[v.RegNo].Count++;
         });
-        reports = Object.values(summary);
+        // build array and sort by Count descending so top offenders appear first
+        reports = Object.values(summary).sort((a, b) => (b.Count || 0) - (a.Count || 0));
         showReports();
       } catch { body.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error ❌</td></tr>`; }
     }
