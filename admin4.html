@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,83 +11,182 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
   <style>
-    body { background-color: #f8f9fa; }
-    .sidebar {
-      height: 100vh; background: linear-gradient(180deg, #0d6efd, #003cbe);
-      color: white; position: fixed; padding-top: 1rem;
+    body {
+      background-color: #f8f9fa;
     }
+
+    .sidebar {
+      height: 100vh;
+      background: linear-gradient(180deg, #0d6efd, #003cbe);
+      color: white;
+      position: fixed;
+      padding-top: 1rem;
+    }
+
     .sidebar a {
-      color: #dce4ff; text-decoration: none; display: block;
-      padding: 10px 20px; border-radius: 8px; margin: 4px 8px;
+      color: #dce4ff;
+      text-decoration: none;
+      display: block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin: 4px 8px;
       transition: all 0.2s;
     }
-    .sidebar a:hover, .sidebar a.active {
-      background: rgba(255, 255, 255, 0.15); color: white;
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
     }
-    .content { margin-left: 250px; padding: 2rem; }
-    .card { border: none; border-radius: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-    table th { background-color: #f1f5ff; }
+
+    .content {
+      margin-left: 250px;
+      padding: 2rem;
+    }
+
+    .card {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    table th {
+      background-color: #f1f5ff;
+    }
+
+    /* Responsif untuk layar kecil */
     @media (max-width: 992px) {
-      .sidebar { position: relative; height: auto; width: 100%; }
-      .content { margin-left: 0; }
+      .sidebar {
+        display: none !important;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 1rem;
+      }
     }
   </style>
 </head>
+
 <body>
+  <!-- Navbar Mobile -->
+  <nav class="navbar navbar-dark bg-primary d-lg-none">
+    <div class="container-fluid">
+      <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <span class="navbar-brand ms-2 fw-bold">LAC Admin</span>
+    </div>
+  </nav>
+
   <div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar p-3" style="width:250px;">
+    <!-- Sidebar (Desktop) -->
+    <div class="sidebar p-3 d-none d-lg-block" style="width:250px;">
       <h4 class="mb-4 text-center fw-bold">LAC Admin</h4>
       <a href="#" id="menuDashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
       <a href="#" id="menuStudents"><i class="bi bi-person-lines-fill"></i> Students</a>
       <a href="#" id="menuReports"><i class="bi bi-journal-text"></i> Reports</a>
     </div>
 
+    <!-- Sidebar (Mobile Offcanvas) -->
+    <div class="offcanvas offcanvas-start bg-primary text-white" tabindex="-1" id="mobileSidebar">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold">LAC Admin</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <a href="#" id="menuDashboardMobile" class="d-block py-2 text-white text-decoration-none"><i
+            class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="#" id="menuStudentsMobile" class="d-block py-2 text-white text-decoration-none"><i
+            class="bi bi-person-lines-fill"></i> Students</a>
+        <a href="#" id="menuReportsMobile" class="d-block py-2 text-white text-decoration-none"><i
+            class="bi bi-journal-text"></i> Reports</a>
+      </div>
+    </div>
+
     <!-- Content -->
     <div class="content flex-grow-1">
       <div class="container-fluid">
 
-        <!-- DASHBOARD VIEW -->
+        <!-- === DASHBOARD VIEW === -->
         <div id="dashboardView">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-primary">Violation Reports Dashboard</h3>
             <button class="btn btn-primary" onclick="loadViolations()"><i class="bi bi-arrow-clockwise"></i> Refresh Data</button>
           </div>
 
-          <!-- Statistik -->
           <div class="row g-3 mb-4">
-            <div class="col-md-3 col-sm-6"><div class="card text-center p-3"><h6 class="text-muted">Total Violations</h6><h3 id="totalViolations" class="fw-bold text-primary">0</h3></div></div>
-            <div class="col-md-3 col-sm-6"><div class="card text-center p-3"><h6 class="text-muted">Unique Students</h6><h3 id="uniqueStudents" class="fw-bold text-success">0</h3></div></div>
-            <div class="col-md-3 col-sm-6"><div class="card text-center p-3"><h6 class="text-muted">Top Rayon</h6><h5 id="topRayon" class="fw-bold text-warning">-</h5></div></div>
-            <div class="col-md-3 col-sm-6"><div class="card text-center p-3"><h6 class="text-muted">Last Updated</h6><h6 id="lastUpdated" class="text-secondary">–</h6></div></div>
+            <div class="col-md-3 col-sm-6">
+              <div class="card text-center p-3">
+                <h6 class="text-muted">Total Violations</h6>
+                <h3 id="totalViolations" class="fw-bold text-primary">0</h3>
+              </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <div class="card text-center p-3">
+                <h6 class="text-muted">Unique Students</h6>
+                <h3 id="uniqueStudents" class="fw-bold text-success">0</h3>
+              </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <div class="card text-center p-3" role="button" onclick="showRayonStats()" style="cursor:pointer;">
+                <h6 class="text-muted">Top Rayon</h6>
+                <h5 id="topRayon" class="fw-bold text-warning">-</h5>
+                <small class="text-secondary">Click for details</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <div class="card text-center p-3">
+                <h6 class="text-muted">Last Updated</h6>
+                <h6 id="lastUpdated" class="text-secondary">–</h6>
+              </div>
+            </div>
           </div>
 
-          <!-- Table + Search -->
           <div class="card">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="card-title mb-0">Violation Records</h5>
-                <input type="text" id="searchViolation" class="form-control w-25" placeholder="Search...">
+                <input type="text" id="searchViolation" class="form-control w-auto" placeholder="Search...">
               </div>
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead>
                     <tr class="text-center">
-                      <th>No</th><th>Reg No</th><th>Name</th><th>Class</th><th>Rayon</th><th>Region</th><th>Violation</th><th>Witness</th><th>Date</th>
+                      <th>No</th>
+                      <th>Reg No</th>
+                      <th>Name</th>
+                      <th>Class</th>
+                      <th>Rayon</th>
+                      <th>Region</th>
+                      <th>Violation</th>
+                      <th>Witness</th>
+                      <th>Date</th>
                     </tr>
                   </thead>
-                  <tbody id="violationBody"><tr><td colspan="9" class="text-center text-muted">Loading data...</td></tr></tbody>
+                  <tbody id="violationBody">
+                    <tr>
+                      <td colspan="9" class="text-center text-muted">Loading data...</td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
-              <div class="d-flex justify-content-between align-items-center">
-                <div>Show <select id="limitViolation" class="form-select d-inline w-auto"><option>5</option><option>10</option><option selected>20</option><option>50</option></select> entries</div>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>Show
+                  <select id="limitViolation" class="form-select d-inline w-auto">
+                    <option>5</option>
+                    <option>10</option>
+                    <option selected>20</option>
+                    <option>50</option>
+                  </select> entries
+                </div>
                 <div id="paginationViolation" class="btn-group"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- STUDENT VIEW -->
+        <!-- === STUDENT VIEW === -->
         <div id="studentView" class="d-none">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-primary">Student Data</h3>
@@ -97,27 +197,43 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="card-title mb-0">Registered Students</h5>
-                <input type="text" id="searchStudent" class="form-control w-25" placeholder="Search...">
+                <input type="text" id="searchStudent" class="form-control w-auto" placeholder="Search...">
               </div>
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead>
                     <tr class="text-center">
-                      <th>No</th><th>Reg No</th><th>Name</th><th>Class</th><th>Dorm</th><th>Region</th>
+                      <th>No</th>
+                      <th>Reg No</th>
+                      <th>Name</th>
+                      <th>Class</th>
+                      <th>Dorm</th>
+                      <th>Region</th>
                     </tr>
                   </thead>
-                  <tbody id="studentBody"><tr><td colspan="6" class="text-center text-muted">Loading data...</td></tr></tbody>
+                  <tbody id="studentBody">
+                    <tr>
+                      <td colspan="6" class="text-center text-muted">Loading data...</td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
-              <div class="d-flex justify-content-between align-items-center">
-                <div>Show <select id="limitStudent" class="form-select d-inline w-auto"><option>5</option><option>10</option><option selected>20</option><option>50</option></select> entries</div>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>Show
+                  <select id="limitStudent" class="form-select d-inline w-auto">
+                    <option>5</option>
+                    <option>10</option>
+                    <option selected>20</option>
+                    <option>50</option>
+                  </select> entries
+                </div>
                 <div id="paginationStudent" class="btn-group"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- REPORT VIEW -->
+        <!-- === REPORT VIEW === -->
         <div id="reportView" class="d-none">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-primary">Cumulative Violation Report</h3>
@@ -128,18 +244,36 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="card-title mb-0">Total Violations per Student</h5>
-                <input type="text" id="searchReport" class="form-control w-25" placeholder="Search...">
+                <input type="text" id="searchReport" class="form-control w-auto" placeholder="Search...">
               </div>
               <div class="table-responsive">
                 <table class="table table-bordered align-middle">
                   <thead class="table-light text-center">
-                    <tr><th>No</th><th>Name</th><th>Class</th><th>Rayon</th><th>Region</th><th>Total Violations</th></tr>
+                    <tr>
+                      <th>No</th>
+                      <th>Name</th>
+                      <th>Class</th>
+                      <th>Rayon</th>
+                      <th>Region</th>
+                      <th>Total Violations</th>
+                    </tr>
                   </thead>
-                  <tbody id="reportBody"><tr><td colspan="6" class="text-center text-muted">Loading...</td></tr></tbody>
+                  <tbody id="reportBody">
+                    <tr>
+                      <td colspan="6" class="text-center text-muted">Loading...</td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
-              <div class="d-flex justify-content-between align-items-center">
-                <div>Show <select id="limitReport" class="form-select d-inline w-auto"><option>5</option><option>10</option><option selected>20</option><option>50</option></select> entries</div>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>Show
+                  <select id="limitReport" class="form-select d-inline w-auto">
+                    <option>5</option>
+                    <option>10</option>
+                    <option selected>20</option>
+                    <option>50</option>
+                  </select> entries
+                </div>
                 <div id="paginationReport" class="btn-group"></div>
               </div>
             </div>
@@ -150,50 +284,112 @@
     </div>
   </div>
 
+  <!-- Modal: Rayon Statistics -->
+  <div class="modal fade" id="rayonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rayon Violation Statistics</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="rayonChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js (needed for rayon chart) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwt2T3L_N318bhVqE3bn2QwrKUjJJRlJVn5Atd7bTfIUPfeiuikm-OAfGYvbDkHSBm9/exec";
-
     // Pagination helper
-    function renderPagination(container, total, limit, current, onPageChange) {
-      const totalPages = Math.ceil(total / limit);
-      let html = '';
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="btn btn-sm ${i === current ? 'btn-primary' : 'btn-outline-primary'}" onclick="${onPageChange}(${i})">${i}</button>`;
-      }
-      document.getElementById(container).innerHTML = html || '';
-    }
+    // function renderPagination(container, total, limit, current, onPageChange) {
+    //   const totalPages = Math.ceil(total / limit);
+    //   let html = '';
+    //   for (let i = 1; i <= totalPages; i++) {
+    //     html += `<button class="btn btn-sm ${i === current ? 'btn-primary' : 'btn-outline-primary'}" onclick="${onPageChange}(${i})">${i}</button>`;
+    //   }
+    //   document.getElementById(container).innerHTML = html || '';
+    // }
 
-    // Search filter
+    function renderPagination(container, total, limit, current, onPageChange) {
+  const totalPages = Math.ceil(total / limit);
+  let html = '';
+
+  if (totalPages <= 1) {
+    document.getElementById(container).innerHTML = '';
+    return;
+  }
+
+  const visiblePages = 5; // jumlah tombol yg tampil
+  let start = Math.max(1, current - Math.floor(visiblePages / 2));
+  let end = Math.min(totalPages, start + visiblePages - 1);
+
+  // Biar gak ngelompati page di ujung
+  if (end - start < visiblePages - 1) start = Math.max(1, end - visiblePages + 1);
+
+  // Tombol Prev
+  html += `<button class="btn btn-sm btn-outline-primary" ${current === 1 ? 'disabled' : ''} onclick="${onPageChange}(${current - 1})">
+    <i class='bi bi-chevron-left'></i> Prev
+  </button>`;
+
+  // Titik awal
+  if (start > 1) html += `<button class="btn btn-sm btn-outline-primary" onclick="${onPageChange}(1)">1</button>
+  ${start > 2 ? '<span class="px-2">...</span>' : ''}`;
+
+  // Tombol halaman aktif di sekitar
+  for (let i = start; i <= end; i++) {
+    html += `<button class="btn btn-sm ${i === current ? 'btn-primary' : 'btn-outline-primary'}" onclick="${onPageChange}(${i})">${i}</button>`;
+  }
+
+  // Titik akhir
+  if (end < totalPages) html += `${end < totalPages - 1 ? '<span class="px-2">...</span>' : ''}
+  <button class="btn btn-sm btn-outline-primary" onclick="${onPageChange}(${totalPages})">${totalPages}</button>`;
+
+  // Tombol Next
+  html += `<button class="btn btn-sm btn-outline-primary" ${current === totalPages ? 'disabled' : ''} onclick="${onPageChange}(${current + 1})">
+    Next <i class='bi bi-chevron-right'></i>
+  </button>`;
+
+  document.getElementById(container).innerHTML = html;
+}
+
+
+
     function filterData(data, keyword) {
       if (!keyword) return data;
       const term = keyword.toLowerCase();
       return data.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(term)));
     }
 
-    // ---- DASHBOARD ----
-    let violations = [];
-    let pageV = 1;
-
+    // DASHBOARD
+    let violations = []; let pageV = 1;
+    let rayonCount = {}; // store counts per rayon
+    let rayonChart = null;
     async function loadViolations() {
       const body = document.getElementById("violationBody");
       body.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Loading...</td></tr>`;
       try {
         const res = await fetch(`${API_URL}?type=Riwayat`);
-        violations = await res.json();
+        violations = (await res.json()).reverse();
+        // compute rayon counts
+        rayonCount = {};
+        violations.forEach(v => rayonCount[v.Rayon] = (rayonCount[v.Rayon] || 0) + 1);
         showViolations();
         document.getElementById("totalViolations").textContent = violations.length;
         document.getElementById("uniqueStudents").textContent = new Set(violations.map(x => x.RegNo)).size;
-        const topRayon = [...violations.reduce((m, x) => m.set(x.Rayon, (m.get(x.Rayon) || 0) + 1), new Map())]
-          .sort((a,b)=>b[1]-a[1])[0];
-        document.getElementById("topRayon").textContent = topRayon ? topRayon[0] : "-";
+        const sorted = Object.entries(rayonCount).sort((a,b)=>b[1]-a[1]);
+        document.getElementById("topRayon").textContent = sorted[0] ? sorted[0][0] : "-";
         document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
       } catch {
         body.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading data ❌</td></tr>`;
       }
     }
-
     function showViolations() {
       const limit = +document.getElementById("limitViolation").value;
       const keyword = document.getElementById("searchViolation").value;
@@ -201,96 +397,172 @@
       const start = (pageV - 1) * limit;
       const current = filtered.slice(start, start + limit);
       document.getElementById("violationBody").innerHTML = current.map((d, i) => `
-        <tr><td>${start+i+1}</td><td>${d.RegNo}</td><td>${d.Name}</td><td>${d.Class}</td>
+        <tr><td>${start + i + 1}</td><td>${d.RegNo}</td><td>${d.Name}</td><td>${d.Class}</td>
         <td>${d.Rayon}</td><td>${d.Region}</td><td>${d.Violation}</td><td>${d.Witness}</td><td>${d.Date}</td></tr>
       `).join('') || `<tr><td colspan="9" class="text-center text-muted">No matching data</td></tr>`;
       renderPagination('paginationViolation', filtered.length, limit, pageV, 'gotoV');
     }
-    function gotoV(p){pageV=p;showViolations();}
-    document.getElementById("limitViolation").onchange = () => {pageV=1;showViolations();}
-    document.getElementById("searchViolation").oninput = () => {pageV=1;showViolations();}
+    // show rayon chart modal
+    function showRayonStats(){
+      if(!rayonCount || Object.keys(rayonCount).length === 0){
+        alert('No data yet. Please refresh first.');
+        return;
+      }
+      const modalEl = document.getElementById('rayonModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
 
-    // ---- STUDENTS ----
-    let students = []; let pageS=1;
+      const labels = Object.keys(rayonCount);
+      const data = Object.values(rayonCount);
+      const ctx = document.getElementById('rayonChart').getContext('2d');
+      if(rayonChart) rayonChart.destroy();
+      rayonChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Total Violations', data, backgroundColor: '#0d6efd' }] },
+        options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+      });
+    }
+    function gotoV(p) { pageV = p; showViolations(); }
+    document.getElementById("limitViolation").onchange = () => { pageV = 1; showViolations(); }
+    document.getElementById("searchViolation").oninput = () => { pageV = 1; showViolations(); }
+
+    // STUDENTS
+    let students = []; let pageS = 1;
     async function loadStudents() {
-      const body=document.getElementById("studentBody");
-      body.innerHTML=`<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
+      const body = document.getElementById("studentBody");
+      body.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
       try {
-        const res=await fetch(API_URL);
-        students=await res.json();
+        const res = await fetch(API_URL);
+        students = await res.json();
         showStudents();
-      } catch {body.innerHTML=`<tr><td colspan="6" class="text-center text-danger">Error ❌</td></tr>`;}
+      } catch { body.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error ❌</td></tr>`; }
     }
-    function showStudents(){
-      const limit=+document.getElementById("limitStudent").value;
-      const keyword=document.getElementById("searchStudent").value;
-      const filtered=filterData(students,keyword);
-      const start=(pageS-1)*limit;
-      const current=filtered.slice(start,start+limit);
-      document.getElementById("studentBody").innerHTML=current.map((d,i)=>`
-        <tr><td>${start+i+1}</td><td>${d.regNo}</td><td>${d.name}</td><td>${d.class}</td><td>${d.dorm}</td><td>${d.region}</td></tr>
-      `).join('')||`<tr><td colspan="6" class="text-center text-muted">No data</td></tr>`;
-      renderPagination('paginationStudent',filtered.length,limit,pageS,'gotoS');
+    function showStudents() {
+      const limit = +document.getElementById("limitStudent").value;
+      const keyword = document.getElementById("searchStudent").value;
+      const filtered = filterData(students, keyword);
+      const start = (pageS - 1) * limit;
+      const current = filtered.slice(start, start + limit);
+      document.getElementById("studentBody").innerHTML = current.map((d, i) => `
+        <tr><td>${start + i + 1}</td><td>${d.regNo}</td><td>${d.name}</td><td>${d.class}</td><td>${d.dorm}</td><td>${d.region}</td></tr>
+      `).join('') || `<tr><td colspan="6" class="text-center text-muted">No data</td></tr>`;
+      renderPagination('paginationStudent', filtered.length, limit, pageS, 'gotoS');
     }
-    function gotoS(p){pageS=p;showStudents();}
-    document.getElementById("limitStudent").onchange=()=>{pageS=1;showStudents();}
-    document.getElementById("searchStudent").oninput=()=>{pageS=1;showStudents();}
+    function gotoS(p) { pageS = p; showStudents(); }
+    document.getElementById("limitStudent").onchange = () => { pageS = 1; showStudents(); }
+    document.getElementById("searchStudent").oninput = () => { pageS = 1; showStudents(); }
 
-    // ---- REPORT ----
-    let reports=[]; let pageR=1;
-    async function loadReport(){
-      const body=document.getElementById("reportBody");
-      body.innerHTML=`<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
-      try{
-        const res=await fetch(`${API_URL}?type=Riwayat`);
-        const data=await res.json();
-        const summary={};
-        data.forEach(v=>{
-          if(!summary[v.RegNo]){
-            summary[v.RegNo]={Name:v.Name,Class:v.Class,Rayon:v.Rayon,Region:v.Region,Count:1};
-          }else summary[v.RegNo].Count++;
+    // REPORTS
+    let reports = []; let pageR = 1;
+    async function loadReport() {
+      const body = document.getElementById("reportBody");
+      body.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
+      try {
+        const res = await fetch(`${API_URL}?type=Riwayat`);
+        const data = await res.json();
+        const summary = {};
+        data.forEach(v => {
+          if (!summary[v.RegNo]) {
+            summary[v.RegNo] = { Name: v.Name, Class: v.Class, Rayon: v.Rayon, Region: v.Region, Count: 1 };
+          } else summary[v.RegNo].Count++;
         });
-        reports=Object.values(summary);
+        reports = Object.values(summary);
         showReports();
-      }catch{body.innerHTML=`<tr><td colspan="6" class="text-center text-danger">Error ❌</td></tr>`;}
+      } catch { body.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error ❌</td></tr>`; }
     }
-    function showReports(){
-      const limit=+document.getElementById("limitReport").value;
-      const keyword=document.getElementById("searchReport").value;
-      const filtered=filterData(reports,keyword);
-      const start=(pageR-1)*limit;
-      const current=filtered.slice(start,start+limit);
-      document.getElementById("reportBody").innerHTML=current.map((s,i)=>`
-        <tr><td>${start+i+1}</td><td>${s.Name}</td><td>${s.Class}</td><td>${s.Rayon}</td><td>${s.Region}</td><td class="text-center"><span class="badge bg-danger">${s.Count}</span></td></tr>
-      `).join('')||`<tr><td colspan="6" class="text-center text-muted">No data</td></tr>`;
-      renderPagination('paginationReport',filtered.length,limit,pageR,'gotoR');
+    function showReports() {
+      const limit = +document.getElementById("limitReport").value;
+      const keyword = document.getElementById("searchReport").value;
+      const filtered = filterData(reports, keyword);
+      const start = (pageR - 1) * limit
+            const current = filtered.slice(start, start + limit);
+      document.getElementById("reportBody").innerHTML = current.map((s, i) => `
+        <tr>
+          <td>${start + i + 1}</td>
+          <td>${s.Name}</td>
+          <td>${s.Class}</td>
+          <td>${s.Rayon}</td>
+          <td>${s.Region}</td>
+          <td class="text-center"><span class="badge bg-danger">${s.Count}</span></td>
+        </tr>
+      `).join('') || `<tr><td colspan="6" class="text-center text-muted">No data</td></tr>`;
+      renderPagination('paginationReport', filtered.length, limit, pageR, 'gotoR');
     }
-    function gotoR(p){pageR=p;showReports();}
-    document.getElementById("limitReport").onchange=()=>{pageR=1;showReports();}
-    document.getElementById("searchReport").oninput=()=>{pageR=1;showReports();}
+    function gotoR(p) { pageR = p; showReports(); }
+    document.getElementById("limitReport").onchange = () => { pageR = 1; showReports(); }
+    document.getElementById("searchReport").oninput = () => { pageR = 1; showReports(); }
 
-    // Print
-    function printReport(){
-      const content=document.getElementById("reportView").innerHTML;
-      const original=document.body.innerHTML;
-      document.body.innerHTML=content;
+    // Print (safely restore original content after printing)
+    function printReport() {
+      const content = document.getElementById("reportView").innerHTML;
+      const original = document.body.innerHTML;
+      document.body.innerHTML = content;
       window.print();
-      document.body.innerHTML=original;
+      document.body.innerHTML = original;
       location.reload();
     }
 
-    // Navigation
-    const menuDashboard=document.getElementById("menuDashboard");
-    const menuStudents=document.getElementById("menuStudents");
-    const menuReports=document.getElementById("menuReports");
-    menuDashboard.onclick=()=>{menuDashboard.classList.add("active");menuStudents.classList.remove("active");menuReports.classList.remove("active");
-      document.getElementById("dashboardView").classList.remove("d-none");document.getElementById("studentView").classList.add("d-none");document.getElementById("reportView").classList.add("d-none");loadViolations();};
-    menuStudents.onclick=()=>{menuStudents.classList.add("active");menuDashboard.classList.remove("active");menuReports.classList.remove("active");
-      document.getElementById("dashboardView").classList.add("d-none");document.getElementById("studentView").classList.remove("d-none");document.getElementById("reportView").classList.add("d-none");loadStudents();};
-    menuReports.onclick=()=>{menuReports.classList.add("active");menuDashboard.classList.remove("active");menuStudents.classList.remove("active");
-      document.getElementById("dashboardView").classList.add("d-none");document.getElementById("studentView").classList.add("d-none");document.getElementById("reportView").classList.remove("d-none");loadReport();};
+    // Navigation (desktop + mobile) — keep behavior konsisten
+    const menuDashboard = document.getElementById("menuDashboard");
+    const menuStudents = document.getElementById("menuStudents");
+    const menuReports = document.getElementById("menuReports");
 
-    loadViolations();
+    // Mobile offcanvas instance (so kita bisa hide setelah klik)
+    const mobileSidebarEl = document.getElementById("mobileSidebar");
+    let mobileOffcanvas;
+    try {
+      mobileOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(mobileSidebarEl);
+    } catch (e) {
+      // ignore if bootstrap not ready yet
+    }
+
+    function activateMenu(menuIdDesktop, menuIdMobile) {
+      // remove active dari semua
+      [menuDashboard, menuStudents, menuReports].forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.offcanvas-body a').forEach(a => a.classList.remove('active'));
+
+      // tambahin active ke yang dipilih (desktop + mobile)
+      if (menuIdDesktop) document.getElementById(menuIdDesktop).classList.add('active');
+      if (menuIdMobile) {
+        const el = document.getElementById(menuIdMobile);
+        if (el) el.classList.add('active');
+      }
+    }
+
+    function showView(view) {
+      document.getElementById("dashboardView").classList.add("d-none");
+      document.getElementById("studentView").classList.add("d-none");
+      document.getElementById("reportView").classList.add("d-none");
+
+      if (view === 'dashboard') {
+        document.getElementById("dashboardView").classList.remove("d-none");
+        activateMenu('menuDashboard', 'menuDashboardMobile');
+        loadViolations();
+      } else if (view === 'students') {
+        document.getElementById("studentView").classList.remove("d-none");
+        activateMenu('menuStudents', 'menuStudentsMobile');
+        loadStudents();
+      } else if (view === 'reports') {
+        document.getElementById("reportView").classList.remove("d-none");
+        activateMenu('menuReports', 'menuReportsMobile');
+        loadReport();
+      }
+      // hide offcanvas on mobile after click
+      if (mobileOffcanvas) mobileOffcanvas.hide();
+    }
+
+    // Desktop clicks
+    menuDashboard.onclick = (e) => { e.preventDefault(); showView('dashboard'); };
+    menuStudents.onclick = (e) => { e.preventDefault(); showView('students'); };
+    menuReports.onclick = (e) => { e.preventDefault(); showView('reports'); };
+
+    // Mobile clicks
+    document.getElementById("menuDashboardMobile").onclick = (e) => { e.preventDefault(); showView('dashboard'); };
+    document.getElementById("menuStudentsMobile").onclick = (e) => { e.preventDefault(); showView('students'); };
+    document.getElementById("menuReportsMobile").onclick = (e) => { e.preventDefault(); showView('reports'); };
+
+    // Load awal
+    showView('dashboard');
   </script>
 </body>
 </html>

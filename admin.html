@@ -129,16 +129,17 @@
               </div>
             </div>
             <div class="col-md-3 col-sm-6">
-              <div class="card text-center p-3" role="button" onclick="showRayonStats()" style="cursor:pointer;">
+              <div class="card text-center p-3" role="button" onclick="showRayonStats()">
                 <h6 class="text-muted">Top Rayon</h6>
                 <h5 id="topRayon" class="fw-bold text-warning">-</h5>
-                <small class="text-secondary">Click for details</small>
+                <small class="text-secondary">(click for details)</small>
               </div>
             </div>
             <div class="col-md-3 col-sm-6">
-              <div class="card text-center p-3">
-                <h6 class="text-muted">Last Updated</h6>
-                <h6 id="lastUpdated" class="text-secondary">–</h6>
+              <div class="card text-center p-3" role="button" onclick="showClassStats()">
+                <h6 class="text-muted">Top Class</h6>
+                <h5 id="topClass" class="fw-bold text-info">-</h5>
+                <small class="text-secondary">(click for details)</small>
               </div>
             </div>
           </div>
@@ -162,6 +163,18 @@
                       <th>Violation</th>
                       <th>Witness</th>
                       <th>Date</th>
+                    </tr>
+                    <!-- FILTER ROW: inputs per column -->
+                    <tr>
+                      <th></th>
+                      <th><input id="colFilterRegNo" class="form-control form-control-sm" placeholder="Reg No"></th>
+                      <th><input id="colFilterName" class="form-control form-control-sm" placeholder="Name"></th>
+                      <th><input id="colFilterClass" class="form-control form-control-sm" placeholder="Class"></th>
+                      <th><input id="colFilterRayon" class="form-control form-control-sm" placeholder="Rayon"></th>
+                      <th><input id="colFilterRegion" class="form-control form-control-sm" placeholder="Region"></th>
+                      <th><input id="colFilterViolation" class="form-control form-control-sm" placeholder="Violation"></th>
+                      <th><input id="colFilterWitness" class="form-control form-control-sm" placeholder="Witness"></th>
+                      <th><input id="colFilterDate" class="form-control form-control-sm" placeholder="Date"></th>
                     </tr>
                   </thead>
                   <tbody id="violationBody">
@@ -210,6 +223,15 @@
                       <th>Dorm</th>
                       <th>Region</th>
                     </tr>
+                    <!-- FILTER ROW: inputs per column (Students) -->
+                    <tr>
+                      <th></th>
+                      <th><input id="colStudentRegNo" class="form-control form-control-sm" placeholder="Reg No"></th>
+                      <th><input id="colStudentName" class="form-control form-control-sm" placeholder="Name"></th>
+                      <th><input id="colStudentClass" class="form-control form-control-sm" placeholder="Class"></th>
+                      <th><input id="colStudentDorm" class="form-control form-control-sm" placeholder="Dorm"></th>
+                      <th><input id="colStudentRegion" class="form-control form-control-sm" placeholder="Region"></th>
+                    </tr>
                   </thead>
                   <tbody id="studentBody">
                     <tr>
@@ -257,6 +279,15 @@
                       <th>Region</th>
                       <th>Total Violations</th>
                     </tr>
+                    <!-- FILTER ROW: inputs per column (Reports) -->
+                    <tr>
+                      <th></th>
+                      <th><input id="colReportName" class="form-control form-control-sm" placeholder="Name"></th>
+                      <th><input id="colReportClass" class="form-control form-control-sm" placeholder="Class"></th>
+                      <th><input id="colReportRayon" class="form-control form-control-sm" placeholder="Rayon"></th>
+                      <th><input id="colReportRegion" class="form-control form-control-sm" placeholder="Region"></th>
+                      <th><input id="colReportTotal" class="form-control form-control-sm" placeholder="Total"></th>
+                    </tr>
                   </thead>
                   <tbody id="reportBody">
                     <tr>
@@ -299,7 +330,22 @@
     </div>
   </div>
 
-  <!-- Chart.js (needed for rayon chart) -->
+  <!-- Modal: Class Statistics -->
+  <div class="modal fade" id="classModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Class Violation Statistics</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <canvas id="classChart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js (needed for rayon and class chart) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Bootstrap JS -->
@@ -370,30 +416,94 @@
     // DASHBOARD
     let violations = []; let pageV = 1;
     let rayonCount = {}; // store counts per rayon
+    let classCount = {}; // store counts per class
     let rayonChart = null;
+    let classChart = null;
+    const columnFilters = {}; // store column filters
+    const colFieldMap = {
+      regno: 'RegNo',
+      name: 'Name',
+      class: 'Class',
+      rayon: 'Rayon',
+      region: 'Region',
+      violation: 'Violation',
+      witness: 'Witness',
+      date: 'Date'
+    };
+    // robust fetch helper: coba dengan ?type=Riwayat dulu, jika status bukan ok atau parsing gagal -> coba tanpa query
+    async function fetchViolationsFromApi() {
+      const urls = [`${API_URL}?type=Riwayat`, API_URL];
+      for (const u of urls) {
+        try {
+          const res = await fetch(u);
+          if (!res.ok) {
+            console.warn('Fetch not ok for', u, res.status);
+            continue;
+          }
+          const json = await res.json();
+          if (Array.isArray(json)) return json;
+          // jika API mengembalikan obj pembungkus, coba ambil property data/rows
+          if (json && typeof json === 'object') {
+            const candidates = ['data', 'rows', 'items', 'result'];
+            for (const c of candidates) if (Array.isArray(json[c])) return json[c];
+          }
+          console.warn('Unexpected JSON structure from', u, json);
+        } catch (err) {
+          console.warn('Fetch/parsing error for', u, err);
+          // lanjut ke url fallback
+        }
+      }
+      throw new Error('Failed to fetch violations from API');
+    }
+
     async function loadViolations() {
       const body = document.getElementById("violationBody");
       body.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Loading...</td></tr>`;
       try {
-        const res = await fetch(`${API_URL}?type=Riwayat`);
-        violations = (await res.json()).reverse();
-        // compute rayon counts
-        rayonCount = {};
-        violations.forEach(v => rayonCount[v.Rayon] = (rayonCount[v.Rayon] || 0) + 1);
-        showViolations();
+        const data = await fetchViolationsFromApi();
+        violations = Array.isArray(data) ? data.reverse() : [];
+        // compute rayon and class counts
+        rayonCount = {}; classCount = {};
+        violations.forEach(v => {
+          const r = v.Rayon || v.rayon || 'Unknown';
+          const c = v.Class || v.class || 'Unknown';
+          rayonCount[r] = (rayonCount[r] || 0) + 1;
+          classCount[c] = (classCount[c] || 0) + 1;
+        });
+
+        // update summary numbers even if table rendering later fails
         document.getElementById("totalViolations").textContent = violations.length;
-        document.getElementById("uniqueStudents").textContent = new Set(violations.map(x => x.RegNo)).size;
-        const sorted = Object.entries(rayonCount).sort((a,b)=>b[1]-a[1]);
-        document.getElementById("topRayon").textContent = sorted[0] ? sorted[0][0] : "-";
-        document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
-      } catch {
+        document.getElementById("uniqueStudents").textContent = new Set(violations.map(x => x.RegNo || x.regNo)).size;
+        const sortedRayon = Object.entries(rayonCount).sort((a,b)=>b[1]-a[1]);
+        const sortedClass = Object.entries(classCount).sort((a,b)=>b[1]-a[1]);
+        document.getElementById("topRayon").textContent = sortedRayon[0] ? sortedRayon[0][0] : "-";
+        document.getElementById("topClass").textContent = sortedClass[0] ? sortedClass[0][0] : "-";
+        // document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
+
+        // render table but guard rendering errors
+        try {
+          showViolations();
+        } catch (renderErr) {
+          console.error('Error rendering violations table:', renderErr);
+          body.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error rendering table — lihat console untuk detail ❌</td></tr>`;
+        }
+      } catch (err) {
+        console.error('loadViolations failed:', err);
         body.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading data ❌</td></tr>`;
       }
     }
     function showViolations() {
       const limit = +document.getElementById("limitViolation").value;
-      const keyword = document.getElementById("searchViolation").value;
-      const filtered = filterData(violations, keyword);
+      const keyword = (document.getElementById("searchViolation").value || '').toLowerCase();
+      // start with global search filter (if any)
+      let filtered = filterData(violations, keyword);
+      // apply column filters
+      Object.keys(columnFilters).forEach(k => {
+        const val = (columnFilters[k] || '').toLowerCase().trim();
+        if (!val) return;
+        const field = colFieldMap[k];
+        filtered = filtered.filter(row => String(row[field] || '').toLowerCase().includes(val));
+      });
       const start = (pageV - 1) * limit;
       const current = filtered.slice(start, start + limit);
       document.getElementById("violationBody").innerHTML = current.map((d, i) => `
@@ -422,13 +532,64 @@
         options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
       });
     }
+    // show class chart modal
+    function showClassStats(){
+      if(!classCount || Object.keys(classCount).length === 0){
+        alert('No data yet. Please refresh first.');
+        return;
+      }
+      const modalEl = document.getElementById('classModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+
+      const labels = Object.keys(classCount);
+      const data = Object.values(classCount);
+      const ctx = document.getElementById('classChart').getContext('2d');
+      if(classChart) classChart.destroy();
+      classChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Total Violations', data, backgroundColor: '#198754' }] },
+        options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+      });
+    }
     function gotoV(p) { pageV = p; showViolations(); }
     document.getElementById("limitViolation").onchange = () => { pageV = 1; showViolations(); }
     document.getElementById("searchViolation").oninput = () => { pageV = 1; showViolations(); }
 
-    // STUDENTS
-    let students = []; let pageS = 1;
-    async function loadStudents() {
+    // setup column filter listeners (wire up inputs)
+    (function initColumnFilters(){
+      const mapping = {
+        colFilterRegNo: 'regno',
+        colFilterName: 'name',
+        colFilterClass: 'class',
+        colFilterRayon: 'rayon',
+        colFilterRegion: 'region',
+        colFilterViolation: 'violation',
+        colFilterWitness: 'witness',
+        colFilterDate: 'date'
+      };
+      Object.keys(mapping).forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener('input', (e) => {
+          columnFilters[mapping[id]] = e.target.value || '';
+          pageV = 1;
+          showViolations();
+        });
+      });
+    })();
+ 
+     // STUDENTS
+     let students = []; let pageS = 1;
+     const studentColumnFilters = {};
+     const colFieldMapStudents = {
+      regno: 'regNo',
+      name: 'name',
+      class: 'class',
+      dorm: 'dorm',
+      region: 'region'
+    };
+     async function loadStudents() {
       const body = document.getElementById("studentBody");
       body.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
       try {
@@ -439,8 +600,15 @@
     }
     function showStudents() {
       const limit = +document.getElementById("limitStudent").value;
-      const keyword = document.getElementById("searchStudent").value;
-      const filtered = filterData(students, keyword);
+      const keyword = (document.getElementById("searchStudent").value || '').toLowerCase();
+      let filtered = filterData(students, keyword);
+      // apply column filters for students
+      Object.keys(studentColumnFilters).forEach(k => {
+        const val = (studentColumnFilters[k] || '').toLowerCase().trim();
+        if (!val) return;
+        const field = colFieldMapStudents[k];
+        filtered = filtered.filter(row => String(row[field] || '').toLowerCase().includes(val));
+      });
       const start = (pageS - 1) * limit;
       const current = filtered.slice(start, start + limit);
       document.getElementById("studentBody").innerHTML = current.map((d, i) => `
@@ -454,6 +622,14 @@
 
     // REPORTS
     let reports = []; let pageR = 1;
+    const reportColumnFilters = {};
+    const colFieldMapReports = {
+      name: 'Name',
+      class: 'Class',
+      rayon: 'Rayon',
+      region: 'Region',
+      total: 'Count'
+    };
     async function loadReport() {
       const body = document.getElementById("reportBody");
       body.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
@@ -472,10 +648,17 @@
     }
     function showReports() {
       const limit = +document.getElementById("limitReport").value;
-      const keyword = document.getElementById("searchReport").value;
-      const filtered = filterData(reports, keyword);
-      const start = (pageR - 1) * limit
-            const current = filtered.slice(start, start + limit);
+      const keyword = (document.getElementById("searchReport").value || '').toLowerCase();
+      let filtered = filterData(reports, keyword);
+      // apply column filters for reports
+      Object.keys(reportColumnFilters).forEach(k => {
+        const val = (reportColumnFilters[k] || '').toLowerCase().trim();
+        if (!val) return;
+        const field = colFieldMapReports[k];
+        filtered = filtered.filter(row => String(row[field] || '').toLowerCase().includes(val));
+      });
+      const start = (pageR - 1) * limit;
+      const current = filtered.slice(start, start + limit);
       document.getElementById("reportBody").innerHTML = current.map((s, i) => `
         <tr>
           <td>${start + i + 1}</td>
