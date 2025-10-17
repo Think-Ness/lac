@@ -8,55 +8,93 @@
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    body { background-color: #f8f9fa; }
+    body {
+      background-color: #f8f9fa;
+    }
     .sidebar {
-      height: 100vh; background: linear-gradient(180deg, #0d6efd, #003cbe);
-      color: white; position: fixed; padding-top: 1rem;
+      height: 100vh;
+      background: linear-gradient(180deg, #0d6efd, #003cbe);
+      color: white;
+      position: fixed;
+      padding-top: 1rem;
     }
     .sidebar a {
-      color: #dce4ff; text-decoration: none; display: block;
-      padding: 10px 20px; border-radius: 8px; margin: 4px 8px;
+      color: #dce4ff;
+      text-decoration: none;
+      display: block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin: 4px 8px;
       transition: all 0.2s;
     }
     .sidebar a:hover, .sidebar a.active {
-      background: rgba(255, 255, 255, 0.15); color: white;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
     }
-    .content { margin-left: 250px; padding: 2rem; }
+    .content {
+      margin-left: 250px;
+      padding: 2rem;
+    }
     .card {
-      border: none; border-radius: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
-    table th { background-color: #f1f5ff; }
+    table th {
+      background-color: #f1f5ff;
+    }
     @media (max-width: 992px) {
-      .sidebar { position: relative; height: auto; width: 100%; }
-      .content { margin-left: 0; }
+      .sidebar { display: none !important; }
+      .content { margin-left: 0; padding: 1rem; }
     }
   </style>
 </head>
+
 <body>
+  <!-- Navbar Mobile -->
+  <nav class="navbar navbar-dark bg-primary d-lg-none">
+    <div class="container-fluid">
+      <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <span class="navbar-brand ms-2 fw-bold">LAC Admin</span>
+    </div>
+  </nav>
+
   <div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar p-3" style="width:250px;">
+    <!-- Sidebar (Desktop) -->
+    <div class="sidebar p-3 d-none d-lg-block" style="width:250px;">
       <h4 class="mb-4 text-center fw-bold">LAC Admin</h4>
       <a href="#" id="menuDashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
       <a href="#" id="menuStudents"><i class="bi bi-person-lines-fill"></i> Students</a>
       <a href="#" id="menuReports"><i class="bi bi-journal-text"></i> Reports</a>
-      <a href="#"><i class="bi bi-gear"></i> Settings</a>
+    </div>
+
+    <!-- Sidebar (Mobile) -->
+    <div class="offcanvas offcanvas-start bg-primary text-white" tabindex="-1" id="mobileSidebar">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold">LAC Admin</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <a href="#" id="menuDashboardMobile" class="d-block py-2 text-white text-decoration-none"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="#" id="menuStudentsMobile" class="d-block py-2 text-white text-decoration-none"><i class="bi bi-person-lines-fill"></i> Students</a>
+        <a href="#" id="menuReportsMobile" class="d-block py-2 text-white text-decoration-none"><i class="bi bi-journal-text"></i> Reports</a>
+      </div>
     </div>
 
     <!-- Content -->
     <div class="content flex-grow-1">
       <div class="container-fluid">
-        
-        <!-- DASHBOARD VIEW -->
+        <!-- === DASHBOARD VIEW === -->
         <div id="dashboardView">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold text-primary">Violation Reports Dashboard</h3>
-            <button class="btn btn-primary" onclick="loadViolations()">
-              <i class="bi bi-arrow-clockwise"></i> Refresh Data
-            </button>
+            <button class="btn btn-primary" onclick="loadViolations()"><i class="bi bi-arrow-clockwise"></i> Refresh Data</button>
           </div>
 
           <div class="row g-3 mb-4">
@@ -73,9 +111,10 @@
               </div>
             </div>
             <div class="col-md-3 col-sm-6">
-              <div class="card text-center p-3">
+              <div class="card text-center p-3" role="button" onclick="showRayonStats()">
                 <h6 class="text-muted">Top Rayon</h6>
                 <h5 id="topRayon" class="fw-bold text-warning">-</h5>
+                <small class="text-secondary">(click for details)</small>
               </div>
             </div>
             <div class="col-md-3 col-sm-6">
@@ -86,22 +125,19 @@
             </div>
           </div>
 
+          <!-- === Tabel Pelanggaran === -->
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title mb-3">Violation Records</h5>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Violation Records</h5>
+                <input type="text" id="searchViolation" class="form-control w-auto" placeholder="Search...">
+              </div>
               <div class="table-responsive">
-                <table class="table table-bordered align-middle" id="tableViolations">
+                <table class="table table-bordered align-middle">
                   <thead>
                     <tr class="text-center">
-                      <th>No</th>
-                      <th>Reg No</th>
-                      <th>Name</th>
-                      <th>Class</th>
-                      <th>Rayon</th>
-                      <th>Region</th>
-                      <th>Violation</th>
-                      <th>Witness</th>
-                      <th>Date</th>
+                      <th>No</th><th>Reg No</th><th>Name</th><th>Class</th>
+                      <th>Rayon</th><th>Region</th><th>Violation</th><th>Witness</th><th>Date</th>
                     </tr>
                   </thead>
                   <tbody id="violationBody">
@@ -109,74 +145,32 @@
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- STUDENT VIEW -->
-        <div id="studentView" class="d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold text-primary">Student Data</h3>
-            <button class="btn btn-primary" onclick="loadStudents()">
-              <i class="bi bi-arrow-clockwise"></i> Refresh
-            </button>
-          </div>
-
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title mb-3">Registered Students</h5>
-              <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                  <thead>
-                    <tr class="text-center">
-                      <th>No</th>
-                      <th>Reg No</th>
-                      <th>Name</th>
-                      <th>Class</th>
-                      <th>Dorm</th>
-                      <th>Region</th>
-                    </tr>
-                  </thead>
-                  <tbody id="studentBody">
-                    <tr><td colspan="6" class="text-center text-muted">Loading data...</td></tr>
-                  </tbody>
-                </table>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>Show
+                  <select id="limitViolation" class="form-select d-inline w-auto">
+                    <option selected>5</option><option>10</option><option>20</option><option>50</option>
+                  </select> entries
+                </div>
+                <div id="paginationViolation" class="btn-group"></div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- REPORT VIEW -->
-        <div id="reportView" class="d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold text-primary">Cumulative Violation Report</h3>
-            <button class="btn btn-success" onclick="printReport()">
-              <i class="bi bi-printer-fill"></i> Print Report
-            </button>
-          </div>
-
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title mb-3">Total Violations per Student</h5>
-              <div class="table-responsive">
-                <table class="table table-bordered align-middle" id="reportTable">
-                  <thead class="table-light text-center">
-                    <tr>
-                      <th>No</th>
-                      <th>Name</th>
-                      <th>Class</th>
-                      <th>Rayon</th>
-                      <th>Region</th>
-                      <th>Total Violations</th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+  <!-- 📊 Modal Statistik Rayon -->
+  <div class="modal fade" id="rayonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Rayon Violation Statistics</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-
+        <div class="modal-body">
+          <canvas id="rayonChart" height="120"></canvas>
+        </div>
       </div>
     </div>
   </div>
@@ -186,166 +180,73 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwt2T3L_N318bhVqE3bn2QwrKUjJJRlJVn5Atd7bTfIUPfeiuikm-OAfGYvbDkHSBm9/exec";
+    let violations = [], rayonCount = {};
 
-    // Load violation data
     async function loadViolations() {
       const body = document.getElementById("violationBody");
       body.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Loading...</td></tr>`;
       try {
         const res = await fetch(`${API_URL}?type=Riwayat`);
-        const data = await res.json();
-        if (!data || data.length === 0) {
-          body.innerHTML = `<tr><td colspan="9" class="text-center text-muted">No data found</td></tr>`;
-          return;
-        }
+        violations = (await res.json()).reverse();
+        showViolations();
 
-        let html = "";
-        data.forEach((d, i) => {
-          html += `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${d.RegNo}</td>
-              <td>${d.Name}</td>
-              <td>${d.Class}</td>
-              <td>${d.Rayon}</td>
-              <td>${d.Region}</td>
-              <td>${d.Violation}</td>
-              <td>${d.Witness}</td>
-              <td>${d.Date}</td>
-            </tr>`;
-        });
-        body.innerHTML = html;
+        document.getElementById("totalViolations").textContent = violations.length;
+        document.getElementById("uniqueStudents").textContent = new Set(violations.map(x => x.RegNo)).size;
 
-        document.getElementById("totalViolations").textContent = data.length;
-        document.getElementById("uniqueStudents").textContent = new Set(data.map(x => x.RegNo)).size;
-        const topRayon = [...data.reduce((m, x) => m.set(x.Rayon, (m.get(x.Rayon) || 0) + 1), new Map())]
-          .sort((a,b)=>b[1]-a[1])[0];
-        document.getElementById("topRayon").textContent = topRayon ? topRayon[0] : "-";
+        rayonCount = {};
+        violations.forEach(v => rayonCount[v.Rayon] = (rayonCount[v.Rayon] || 0) + 1);
+
+        const sorted = Object.entries(rayonCount).sort((a,b)=>b[1]-a[1]);
+        document.getElementById("topRayon").textContent = sorted[0] ? sorted[0][0] : "-";
         document.getElementById("lastUpdated").textContent = new Date().toLocaleString();
       } catch {
         body.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading data ❌</td></tr>`;
       }
     }
 
-    // Load student data
-    async function loadStudents() {
-      const body = document.getElementById("studentBody");
-      body.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        if (!data || data.length === 0) {
-          body.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No data found</td></tr>`;
-          return;
+    function showViolations() {
+      const limit = +document.getElementById("limitViolation").value;
+      const keyword = document.getElementById("searchViolation").value.toLowerCase();
+      const filtered = violations.filter(v =>
+        Object.values(v).some(val => String(val).toLowerCase().includes(keyword))
+      );
+      const start = 0;
+      document.getElementById("violationBody").innerHTML = filtered.slice(start, limit).map((d, i) => `
+        <tr><td>${i + 1}</td><td>${d.RegNo}</td><td>${d.Name}</td><td>${d.Class}</td>
+        <td>${d.Rayon}</td><td>${d.Region}</td><td>${d.Violation}</td><td>${d.Witness}</td><td>${d.Date}</td></tr>
+      `).join('');
+    }
+
+    // 🧭 Klik Top Rayon → Tampilkan Chart
+    let rayonChart;
+    function showRayonStats() {
+      if (!Object.keys(rayonCount).length) return alert("Data belum dimuat 😅");
+      const modal = new bootstrap.Modal(document.getElementById("rayonModal"));
+      modal.show();
+
+      const ctx = document.getElementById("rayonChart").getContext("2d");
+      const labels = Object.keys(rayonCount);
+      const data = Object.values(rayonCount);
+
+      if (rayonChart) rayonChart.destroy();
+      rayonChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Violations',
+            data: data,
+            backgroundColor: '#0d6efd'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
         }
-
-        let html = "";
-        data.forEach((d, i) => {
-          html += `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${d.regNo}</td>
-              <td>${d.name}</td>
-              <td>${d.class}</td>
-              <td>${d.dorm}</td>
-              <td>${d.region}</td>
-            </tr>`;
-        });
-        body.innerHTML = html;
-      } catch {
-        body.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error loading data ❌</td></tr>`;
-      }
+      });
     }
 
-    // Load cumulative report
-    async function loadReport() {
-      const tbody = document.querySelector("#reportTable tbody");
-      tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
-      try {
-        const res = await fetch(`${API_URL}?type=Riwayat`);
-        const data = await res.json();
-        if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No data found</td></tr>`;
-          return;
-        }
-
-        const summary = {};
-        data.forEach((v) => {
-          if (!summary[v.RegNo]) {
-            summary[v.RegNo] = {
-              Name: v.Name,
-              Class: v.Class,
-              Rayon: v.Rayon,
-              Region: v.Region,
-              Count: 1
-            };
-          } else {
-            summary[v.RegNo].Count++;
-          }
-        });
-
-        const arr = Object.values(summary);
-        tbody.innerHTML = arr.map((s, i) => `
-          <tr>
-            <td>${i + 1}</td>
-            <td>${s.Name}</td>
-            <td>${s.Class}</td>
-            <td>${s.Rayon}</td>
-            <td>${s.Region}</td>
-            <td class="text-center"><span class="badge bg-danger">${s.Count}</span></td>
-          </tr>
-        `).join("");
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error loading report ❌</td></tr>`;
-      }
-    }
-
-    // Print report
-    function printReport() {
-      const printContent = document.getElementById("reportView").innerHTML;
-      const original = document.body.innerHTML;
-      document.body.innerHTML = printContent;
-      window.print();
-      document.body.innerHTML = original;
-      location.reload();
-    }
-
-    // Menu navigation
-    const menuDashboard = document.getElementById("menuDashboard");
-    const menuStudents = document.getElementById("menuStudents");
-    const menuReports = document.getElementById("menuReports");
-
-    menuDashboard.addEventListener("click", () => {
-      menuDashboard.classList.add("active");
-      menuStudents.classList.remove("active");
-      menuReports.classList.remove("active");
-      document.getElementById("dashboardView").classList.remove("d-none");
-      document.getElementById("studentView").classList.add("d-none");
-      document.getElementById("reportView").classList.add("d-none");
-      loadViolations();
-    });
-
-    menuStudents.addEventListener("click", () => {
-      menuStudents.classList.add("active");
-      menuDashboard.classList.remove("active");
-      menuReports.classList.remove("active");
-      document.getElementById("dashboardView").classList.add("d-none");
-      document.getElementById("studentView").classList.remove("d-none");
-      document.getElementById("reportView").classList.add("d-none");
-      loadStudents();
-    });
-
-    menuReports.addEventListener("click", () => {
-      menuReports.classList.add("active");
-      menuDashboard.classList.remove("active");
-      menuStudents.classList.remove("active");
-      document.getElementById("dashboardView").classList.add("d-none");
-      document.getElementById("studentView").classList.add("d-none");
-      document.getElementById("reportView").classList.remove("d-none");
-      loadReport();
-    });
-
-    // Default load
     loadViolations();
   </script>
 </body>
